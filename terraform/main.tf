@@ -4,6 +4,7 @@ terraform {
         source = "hashicorp/aws"
         version = "~>5.0"
     }
+
   }
 }
 
@@ -53,12 +54,14 @@ resource "aws_iam_policy" "dynamodb_log_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Action   = [
-            "dynamodb:PutItem",
-            "dynamodb:Scan",
-            "dynamodb:Query",
-            "dynamodb:DescribeTable"            
-        ]
+        Action = [
+        "dynamodb:PutItem",
+        "dynamodb:GetItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:BatchGetItem","dynamodb:Query","dynamodb:Scan","dynamodb:DescribeTable"
+      ]
         Effect   = "Allow"
         Resource = [
           aws_dynamodb_table.log_instance_table.arn,
@@ -109,4 +112,79 @@ output "access_key_id" {
 output "secret_access_key" {
   value = aws_iam_access_key.log_user_key.secret
   sensitive = true
+}
+
+
+#lambda role
+
+resource "aws_iam_role" "lambda_dynamodb_role" {
+  name = "lambda-dynamodb-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      }
+    ]
+  })
+  
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_logs" {
+  role       = aws_iam_role.lambda_dynamodb_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_dynamodb" {
+  role       = aws_iam_role.lambda_dynamodb_role.name
+  policy_arn = aws_iam_policy.dynamodb_log_policy.arn
+}
+
+resource "aws_lambda_function" "log_service" {
+  function_name = "log-service-function"
+  role          = aws_iam_role.lambda_dynamodb_role.arn
+  handler       = "index.handler"
+  runtime       = "nodejs20.x"
+  filename      = "${path.module}/../lambda/dist.zip"
+
+  source_code_hash = filebase64sha256("${path.module}/../lambda/dist.zip")
+
+  timeout = 10
+
+
+  depends_on = [
+    aws_iam_role_policy_attachment.lambda_logs,
+    aws_iam_role_policy_attachment.lambda_dynamodb
+  ]
+  
+  environment {
+    variables = {
+      DYNAMODB_TABLE = aws_dynamodb_table.log_instance_table.name
+      Shared_secret = "my_shared_secret"
+    }
+  }
+}
+
+
+resource "aws_lambda_function_url" "log_service_url" {
+  function_name      = aws_lambda_function.log_service.function_name
+  authorization_type = "NONE" # Public endpoint; security via x-api-key header check in Lambda
+  
+  cors {
+    allow_credentials = false
+    allow_headers     = ["content-type", "x-api-key"]
+    allow_methods     = ["GET", "POST", "OPTIONS"]
+    allow_origins     = ["*"]
+    max_age           = 3600
+  }
+}
+
+# NEW: Output the Function URL for users
+output "function_url" {
+  value = aws_lambda_function_url.log_service_url.function_url
+  description = "Public HTTPS endpoint for log service API"
 }

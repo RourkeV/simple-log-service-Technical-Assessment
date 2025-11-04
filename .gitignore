@@ -31,3 +31,10 @@ aws-credentials.txt
 # OS files
 .DS_Store
 Thumbs.db
+
+#node modules
+node_modules/
+
+#packaged lambda files
+lambda/package-lock.json
+lambda/package.json

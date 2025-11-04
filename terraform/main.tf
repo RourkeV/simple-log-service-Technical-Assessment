@@ -115,6 +115,8 @@ output "secret_access_key" {
 }
 
 
+
+
 #lambda role
 
 resource "aws_iam_role" "lambda_dynamodb_role" {
@@ -164,7 +166,7 @@ resource "aws_lambda_function" "log_service" {
   environment {
     variables = {
       DYNAMODB_TABLE = aws_dynamodb_table.log_instance_table.name
-      Shared_secret = "my_shared_secret"
+      Shared_secret = "assessment-api-key"
     }
   }
 }
@@ -172,18 +174,17 @@ resource "aws_lambda_function" "log_service" {
 
 resource "aws_lambda_function_url" "log_service_url" {
   function_name      = aws_lambda_function.log_service.function_name
-  authorization_type = "NONE" # Public endpoint; security via x-api-key header check in Lambda
-  
+  authorization_type = "NONE" 
   cors {
     allow_credentials = false
     allow_headers     = ["content-type", "x-api-key"]
-    allow_methods     = ["GET", "POST", "OPTIONS"]
+    allow_methods     = ["*"]
     allow_origins     = ["*"]
     max_age           = 3600
   }
 }
 
-# NEW: Output the Function URL for users
+
 output "function_url" {
   value = aws_lambda_function_url.log_service_url.function_url
   description = "Public HTTPS endpoint for log service API"

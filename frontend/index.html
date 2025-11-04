@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Service</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <h1>Log Service</h1>
+    
+    <h2>Configuration</h2>
+    <div class="form-group">
+        <label>API URL:</label>
+        <input type="text" id="apiUrl">
+    </div>
+    
+    <div class="form-group">
+        <label>API Key:</label>
+        <input type="text" id="apiKey">
+    </div>
+    
+    <hr>
+    
+    <h2>Write Log</h2>
+    <div class="form-group">
+        <label>ID:</label>
+        <input type="text" id="logId">
+    </div>
+    
+    <div class="form-group">
+        <label>Message:</label>
+        <textarea id="message" rows="3"></textarea>
+    </div>
+    
+    <div class="form-group">
+        <label>Severity:</label>
+        <select id="severity">
+            <option value="INFO">INFO</option>
+            <option value="WARNING">WARNING</option>
+            <option value="ERROR">ERROR</option>
+        </select>
+    </div>
+    
+    <button>Post Log</button>
+    
+    <hr>
+    
+    <h2>Read Logs</h2>
+    <div class="form-group">
+        <label>ID:</label>
+        <input type="text" id="searchId">
+    </div>
+    
+    <button>Get Logs</button>
+    
+    <div id="response"></div>
+    <div id="logs"></div>
+</body>
+</html>

@@ -51,10 +51,10 @@ async function writeLog(){
 }
 
 //GET function
-async function readlogs(){
+async function readLogs(){
     const url = document.getElementById('apiUrl').value.trim();
     const key = document.getElementById('apiKey').value.trim();
-
+    document.getElementById('getLogsBtn').textContent = "Refresh Logs";
     if(!url){
         showResponse('Please enter API URL', false);
         return;
@@ -71,13 +71,16 @@ async function readlogs(){
         const result = await response.json();
 
         if (response.ok) {
-            if(result.items && result.item.length > 0){
+            if(result.items && result.items.length > 0){
                 showResponse(`Showing ${result.items.length} most recent logs`, true);
                 displayLogs(result.items);
             } else {
                 showResponse('No logs found', true);
                 document.getElementById('logs').innerHTML = '<p>No logs to display</p>';
             }
+        }else {
+            showResponse(`Error: ${result.error || 'Failed to fetch logs'}`, false);
+            document.getElementById('logs').innerHTML = '';
         }
     }catch (error) {
         showResponse(`Network error: ${error.message}`, false);

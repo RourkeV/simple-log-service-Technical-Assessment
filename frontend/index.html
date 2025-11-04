@@ -12,26 +12,17 @@
     <h2>Configuration</h2>
     <div class="form-group">
         <label>API URL:</label>
-        <input type="text" id="apiUrl">
+        <input type="text" id="apiUrl" value="https://s4emo4zx6btkjs4a3b3ey2zmbm0fzfcj.lambda-url.af-south-1.on.aws/">
     </div>
     
     <div class="form-group">
         <label>API Key:</label>
-        <input type="text" id="apiKey">
+        <input type="text" id="apiKey" value="assessment-api-key">
     </div>
     
     <hr>
     
     <h2>Write Log</h2>
-    <div class="form-group">
-        <label>ID:</label>
-        <input type="text" id="logId">
-    </div>
-    
-    <div class="form-group">
-        <label>Message:</label>
-        <textarea id="message" rows="3"></textarea>
-    </div>
     
     <div class="form-group">
         <label>Severity:</label>
@@ -42,7 +33,14 @@
         </select>
     </div>
     
-    <button>Post Log</button>
+    <div class="form-group">
+        <label>Message:</label>
+        <textarea id="message" rows="3"></textarea>
+    </div>
+    
+    
+    
+    <button onclick="writeLog()">Post Log</button>
     
     <hr>
     
@@ -52,9 +50,12 @@
         <input type="text" id="searchId">
     </div>
     
-    <button>Get Logs</button>
+    <button onclick="readLogs()">Get Logs</button>
     
-    <div id="response"></div>
+    <div id="response" class="response"></div>
     <div id="logs"></div>
+
+    <script src="index.js"></script>
+
 </body>
 </html>
